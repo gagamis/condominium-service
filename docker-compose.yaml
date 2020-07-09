@@ -1,0 +1,45 @@
+version: "3"
+
+networks:
+  traefik-public:
+    external: true
+
+services:
+  condominium-service:
+  
+    image: condominium-service:latest
+
+    environment:
+     - "NODE_ENV=production"
+     - "PORT=5000"
+     - "MONGO_URI=mongodb://mongodb:27017/condominium?authSource=admin"
+     - "MONGO_USER=root"
+     - "MONGO_PASSWORD=123qweASD"
+
+    networks:
+      - traefik-public
+
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.tags=public
+        - traefik.docker.network=traefik-public
+
+        - "traefik.http.routers.condominium-service.rule=Host(`api.e-tarsashazkezelo.hu`) && PathPrefix(`/condominium`)"
+        - traefik.http.routers.condominium-service.service=condominium-service
+        - "traefik.http.routers.condominium-service.tls=true"
+        - "traefik.http.routers.condominium-service.entrypoints=websecure"
+        - "traefik.http.routers.condominium-service.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.condominium-service.loadbalancer.server.port=5000"
+
+        - "traefik.http.middlewares.condominium-service-https-redirect.redirectscheme.scheme=websecure"
+
+        - "traefik.http.middlewares.condominium-service_pathstrip.stripprefix.prefixes=/condominium"
+        # - "traefik.http.middlewares.condominium-service_pathstrip.stripprefix.forceslash=false"
+
+        - traefik.http.middlewares.condominium-service-forward.forwardauth.address=https://auth.e-tarsashazkezelo.hu/forward-auth
+        - traefik.http.middlewares.condominium-service-forward.forwardauth.authResponseHeaders=X-Auth-User
+        - traefik.http.middlewares.condominium-service-forward.forwardauth.trustForwardHeader=true
+        - "traefik.http.middlewares.condominium-service-forward.forwardauth.tls.insecureSkipVerify=true"
+
+        - traefik.http.routers.condominium-service.middlewares=condominium-service-forward, condominium-service_pathstrip
