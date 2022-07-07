@@ -32,7 +32,7 @@
     "http-status": "^1.4.2",
     "joi": "^14.3.1",
     "joi-objectid": "^3.0.1",
-    "moment": "^2.26.0",
+    "moment": "^2.29.4",
     "mongoose": "^5.9.15",
     "mongoose-timestamp": "^0.6.0",
     "morgan": "^1.10.0",
